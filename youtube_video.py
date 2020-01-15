@@ -1,51 +1,59 @@
 # -*- coding: utf-8 -*-
-# function: get video url from youtube based on search query
 
-from apiclient.discovery import build
+# Sample Python code for youtube.channels.list
+# See instructions for running these code samples locally:
+# https://developers.google.com/explorer-help/guides/code_samples#python
 
-DEVELOPER_KEY = "AIzaSyDhkgPCy2hncXO48_MJq3gyA0MFwMV4Wv4"
-YOUTUBE_API_SERVICE_NAME = "youtube"
-YOUTUBE_API_VERSION = "v3"
+import os
+import google_auth_oauthlib.flow
+import googleapiclient.discovery
+import googleapiclient.errors
 
-def youtube_search(q, max_results=50,order="relevance", token=None, location=None, location_radius=None):
+scopes = ["https://www.googleapis.com/auth/youtube.readonly"]
 
-  youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
-    developerKey=DEVELOPER_KEY)
+def main():
+    # Disable OAuthlib's HTTPS verification when running locally.
+    # *DO NOT* leave this option enabled in production.
+    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
-  # more parameters setting can be found in https://developers.google.com/youtube/v3/docs/search/list
-  search_response = youtube.search().list(
-    q=q,
-    type="video",
-    pageToken=token,
-    order=order,
-    part="id,snippet",
-    videoDuration='short',
-    maxResults=max_results,
-    location=location,
-    locationRadius=location_radius
-  ).execute()
+    api_service_name = "youtube"
+    api_version = "v3"
+    client_secrets_file = "client_secret.json"
 
-  videos = []
+    # Get credentials and create an API client
+    flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
+        client_secrets_file, scopes)
+    credentials = flow.run_console()
+    youtube = googleapiclient.discovery.build(
+        api_service_name, api_version, credentials=credentials)
 
-  for search_result in search_response.get("items", []):
-    if search_result["id"]["kind"] == "youtube#video":
-      videos.append(search_result)
-  try:
-      nexttok = search_response["nextPageToken"]
-      return(nexttok, videos)
-  except Exception as e:
-      nexttok = "last_page"
-      return(nexttok, videos)
+    ## please see the link: https://developers.google.com/youtube/v3/docs to get more ways to use this API
+    ## search query
+    # API only allow maxResults in range [0, 50]
+    request = youtube.search().list(
+        q='cat',
+        type="video",
+        part="id,snippet",
+        maxResults=50
+    )
+
+    ## videoId
+    # API only allow maxResults in range [0, 50]
+    request = youtube.videos().list(
+        part="snippet, contentDetails, recordingDetails, localizations, statistics",
+        id="Ks-_Mh1QhMc,c0KYU2j0TM4,eIho2S0ZahI"
+    )
+
+    response = request.execute()
+    print(response)
+
+    ## get video info
+    videos = []
+    for search_result in response.get("items", []):
+        if search_result["id"]["kind"] == "youtube#video":
+            videos.append(search_result)
+    print(videos)
 
 
-def geo_query(video_id):
-    youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
-                    developerKey=DEVELOPER_KEY)
-
-    video_response = youtube.videos().list(
-        id=video_id,
-        part='snippet, recordingDetails, statistics'
-
-    ).execute()
-
-    return video_response
+if __name__ == "__main__":
+    main()
