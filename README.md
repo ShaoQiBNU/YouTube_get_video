@@ -7,7 +7,7 @@
 
 - 按照教程[[Where to download your_client_secret_File.json file](https://stackoverflow.com/questions/52200589/where-to-download-your-client-secret-file-json-file)下载your_client_secret_File.json file
 
-# 二. YouTube视频爬取
+# 二. YouTube视频信息爬取
 
 YouTube提供了多种视频爬取方式，以其中两种为例：一种是通过search query；一种是通过videoId。
 
@@ -431,4 +431,8 @@ for search_result in search_response.get("items", []):
     if search_result["id"]["kind"] == "youtube#video":
         videos.append(search_result)
 ```
+
+# 三. YouTube视频下载
+
+Youtube视频下载可以使用youtube-dl工具，具体参考：https://github.com/ytdl-org/youtube-dl ，使用方法可以参考： https://zhuanlan.zhihu.com/p/27718783 ，批量生成下载命令可以参考：https://github.com/activitynet/ActivityNet/blob/master/Crawler/run_crosscheck.py
 
