@@ -5,7 +5,7 @@
 
 - 按照教程[Part 1: Using YouTube’s Python API for Data Science](https://towardsdatascience.com/tutorial-using-youtubes-annoying-data-api-in-python-part-1-9618beb0e7ea)申请YouTube API Key
 
-- 按照教程[[Where to download your_client_secret_File.json file](https://stackoverflow.com/questions/52200589/where-to-download-your-client-secret-file-json-file)下载your_client_secret_File.json file
+- 按照教程[Where to download your_client_secret_File.json file](https://stackoverflow.com/questions/52200589/where-to-download-your-client-secret-file-json-file)下载your_client_secret_File.json file
 
 # 二. YouTube视频信息爬取
 
