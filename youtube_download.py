@@ -7,8 +7,9 @@ import time
 from bs4 import BeautifulSoup
 
 
-########### 打开hrome ############
-driver = webdriver.Chrome(executable_path="/home/sensetime/Desktop/code/anet_dataset/chromedriver")#用chrome浏览器打开
+########### 打开Chrome浏览器 ############
+# chromedriver下载地址： http://npm.taobao.org/mirrors/chromedriver/
+driver = webdriver.Chrome(executable_path="/home/sensetime/Desktop/code/anet_dataset/chromedriver")
 driver.get("https://www.youtube.com/")
 
 
