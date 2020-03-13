@@ -1,17 +1,19 @@
 从YouTube上爬取视频
 ========================
 
-# 一. YouTube API Key 申请
+# 一. YouTube官方爬取
+
+ ## (一) API Key 申请
 
 - 按照教程[Part 1: Using YouTube’s Python API for Data Science](https://towardsdatascience.com/tutorial-using-youtubes-annoying-data-api-in-python-part-1-9618beb0e7ea)申请YouTube API Key
 
 - 按照教程[Where to download your_client_secret_File.json file](https://stackoverflow.com/questions/52200589/where-to-download-your-client-secret-file-json-file)下载your_client_secret_File.json file
 
-# 二. YouTube视频信息爬取
+## (二) YouTube视频信息爬取
 
 YouTube提供了多种视频爬取方式，以其中两种为例：一种是通过search query；一种是通过videoId。
 
-## (一) search query
+### 1. search query
 
 youtube_videos.py函数定义如下：
 
@@ -111,7 +113,7 @@ if __name__ == "__main__":
 }
 ```
 
-## (二) videoId
+### 2. videoId
 
 youtube_videos.py函数定义如下：
 
@@ -422,9 +424,9 @@ if __name__ == "__main__":
 }
 ```
 
-## (三) 提取信息
+### 3. 提取信息
 
-根据(二)resource的json结果，可以提取其中的信息，从而进行下一步统计。
+根据resource的json结果，可以提取其中的信息，从而进行下一步统计。
 
 ```python
 for search_result in search_response.get("items", []):
@@ -432,7 +434,75 @@ for search_result in search_response.get("items", []):
         videos.append(search_result)
 ```
 
+# 二. selenium模拟浏览器下载youtube视频
+
+> 由于官方youtube查询时最多只能返回50个查询结果，每次查询时返回结果几乎一样，另外，youttube需要鼠标滑动到页面底端才会有刷新，新一批的视频才会召回，而此时url并没有变化，静态爬虫无法满足。因此，为了能够爬取类似网页的信息，可以采用selenium来模拟鼠标操作浏览器，实现动态爬虫。
+
+```python
+#! /usr/bin/env python3
+# author: Qi Shao
+
+########### load packages ############
+from selenium import webdriver
+import time
+from bs4 import BeautifulSoup
+
+
+########### 打开Chrome浏览器 ############
+# chromedriver下载地址： http://npm.taobao.org/mirrors/chromedriver/
+driver = webdriver.Chrome(executable_path="/home/sensetime/Desktop/code/anet_dataset/chromedriver")
+driver.get("https://www.youtube.com/")
+
+
+########### 窗口最大化 ############
+driver.maximize_window()
+time.sleep(1)
+driver.refresh()
+
+
+########### 获取cookie ############
+cookie = driver.get_cookies()
+
+
+########### 查询query ############
+for query in ['cat', 'dog']:
+
+    ########### 查询query，限制video时长在4分钟以内 ############
+    url = 'https://www.youtube.com/results?search_query=' + query + '&sp=EgQQARgB'
+    driver.get(url)
+    print(query)
+
+    def execute_times(times):
+        for i in range(times + 1):
+            ########### 解析html ############
+            html = driver.page_source
+            soup = BeautifulSoup(html, 'lxml')
+            zzr = soup.find_all('a', id="thumbnail")
+
+            ########### 获取video_id ############
+            for item in zzr:
+                video = item.get("href")
+                if video is not None and "/watch?v=" in video:
+                    video_id = video.replace('/watch?v=', '')
+                    print(video_id)
+
+            ########### 模拟鼠标向下滑动 ############
+            js = "var q=document.documentElement.scrollTop=100000000000"
+            driver.execute_script(js)
+            time.sleep(3)  # 等待页面刷新
+
+    ########### 模拟鼠标向下滑动3次 ############
+    execute_times(3)
+    time.sleep(1)
+
+########### 退出Chrome ############
+driver.quit()
+```
+
+参考：https://www.zhihu.com/question/46528604
+
+selenium参考：https://selenium-python.readthedocs.io/installation.html
+
 # 三. YouTube视频下载
 
 Youtube视频下载可以使用youtube-dl工具，具体参考：https://github.com/ytdl-org/youtube-dl ，使用方法可以参考： https://zhuanlan.zhihu.com/p/27718783 ，批量生成下载命令可以参考：https://github.com/activitynet/ActivityNet/blob/master/Crawler/run_crosscheck.py
-
